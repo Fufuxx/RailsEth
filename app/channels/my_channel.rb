@@ -21,15 +21,20 @@ class MyChannel < ApplicationCable::Channel
   def getWallets
     p "=== Getting Wallets ==="
     begin
-      p Wallet.all.first.address
-      p Wallet.all.first.transactions
+      collection = []
+      Wallet.all.each do |w|
+        c = {
+          :wallet => w,
+          :transactions => self.getTransactions(w.address)
+        }
 
-      self.getBalance(Wallet.all.first.address)
-      self.getTransactions(Wallet.all.first.address)
+        collection << c
+      end
 
       ActionCable.server.broadcast "MyStream",
         { :method => 'getWallets', :status => 'success',
-          :data => Wallet.all }
+          :data => collection }
+
     rescue Exception => e
       p e
     end
@@ -38,10 +43,9 @@ class MyChannel < ApplicationCable::Channel
   def getBalance(address)
     begin
       p "Getting Eth Wallet Balance for address #{address}"
+
       url = "https://api-ropsten.etherscan.io/api?module=account&action=balance&address=#{address}&tag=latest&apikey=#{ENV['ETH_SCAN_API_KEY']}"
-      p url
       res = HTTParty.get(url)
-      p "Response === "
       p res.parsed_response['result']
     rescue Exception => e
       p e

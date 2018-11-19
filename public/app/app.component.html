@@ -2,18 +2,19 @@
 <div class="slds-grid slds-wrap">
   <div class="slds-col slds-size_1-of-2">
     <div class="slds-text-heading_medium slds-p-around_medium">MeWalleths</div>
-    <div class="slds-form-element slds-p-around_medium" *ngIf="wallets.length > 0">
+    <div class="slds-form-element slds-p-around_medium" *ngIf="collection.length > 0">
       <div class="slds-form-element__control">
         <div class="slds-select_container">
-          <select  [(ngModel)]="selectedWallet" class="slds-select" (change)="handleSelectionChange()">
+          <select  [(ngModel)]="selectedItem" class="slds-select" (change)="handleSelectionChange()">
             <option value="" selected disabled>Please select</option>
-            <option [ngValue]="wallet" *ngFor="let wallet of wallets">{{ wallet.name }}</option>
+            <option [ngValue]="item" *ngFor="let item of collection">{{ item.wallet.name }}</option>
           </select>
         </div>
       </div>
     </div>
-    <p class="slds-p-around_medium" *ngIf="wallets.length === 0">No Walleth found. Please create a Walleth first.</p>
-    <hr/>
+    <p class="slds-p-around_medium" *ngIf="collection.length === 0">No Wallet found. Please create a Walleth first.</p>   
+  </div>
+  <div class="slds-col slds-size_1-of-2">
     <div class="slds-text-heading_medium slds-p-around_medium">Create New Walleth</div>
     <div class="slds-form slds-form_horizontal slds-p-around_medium">
       <div class="slds-form-element">
@@ -28,9 +29,38 @@
       </div> 
     </div>
   </div>
-  <div class="slds-col slds-size_1-of-2">
-    <div class="slds-text-heading_medium slds-p-around_medium">Wallet Infos</div>
-    <p class="slds-p-around_medium" *ngIf="selectedWallet != ''">Select or Create a wallet first.</p>
-    
+</div>
+<div class="slds-grid slds-wrap">
+  <div class="slds-col slds-size_1-of-1">
+    <div class="slds-text-heading_medium slds-p-around_medium">Wallet Transactions</div>
+    <p class="slds-p-around_medium" *ngIf="selectedItem === ''">Select or Create a wallet first.</p>
+    <table *ngIf="selectedItem != ''" class="slds-table slds-table_cell-buffer slds-table_bordered">
+      <thead>
+        <tr class="slds-line-height_reset">
+          <th class="slds-text-title_caps" scope="col">
+            <div class="slds-truncate" title="Opportunity Name">From</div>
+          </th>
+          <th class="slds-text-title_caps" scope="col">
+            <div class="slds-truncate" title="Account Name">To</div>
+          </th>
+          <th class="slds-text-title_caps" scope="col">
+            <div class="slds-truncate" title="Close Date">Value</div>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tx of selectedItem.transactions" class="slds-hint-parent">
+          <td data-label="Account Name">
+            <div class="slds-truncate" title="from">{{ tx.from }}</div>
+          </td>
+          <td data-label="Account Name">
+            <div class="slds-truncate" title="to">{{ tx.to }}</div>
+          </td>
+          <td data-label="Account Name">
+            <div class="slds-truncate" title="value">{{ tx.value }} Wei</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>

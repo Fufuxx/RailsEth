@@ -21,8 +21,8 @@ System.register(["@angular/core"], function (exports_1, context_1) {
             AppComponent = /** @class */ (function () {
                 function AppComponent() {
                     this.App = {};
-                    this.wallets = [];
-                    this.selectedWallet = "";
+                    this.collection = [];
+                    this.selectedItem = "";
                     var self = this;
                     this.App.cable = ActionCable.createConsumer("ws://localhost:3000/cable");
                     this.App.MyChannel = this.App.cable.subscriptions.create({ channel: "MyChannel", context: {} }, {
@@ -40,7 +40,7 @@ System.register(["@angular/core"], function (exports_1, context_1) {
                         received: function (data) {
                             console.log('Data Received from backend', data);
                             if (data.method === 'getWallets') {
-                                self.wallets = data.data;
+                                self.collection = data.data;
                             }
                         },
                         createWallet: function (data) {
@@ -55,7 +55,7 @@ System.register(["@angular/core"], function (exports_1, context_1) {
                 AppComponent.prototype.ngOnInit = function () {
                 };
                 AppComponent.prototype.handleSelectionChange = function () {
-                    console.log(this.selectedWallet);
+                    console.log(this.selectedItem);
                 };
                 AppComponent = __decorate([
                     core_1.Component({

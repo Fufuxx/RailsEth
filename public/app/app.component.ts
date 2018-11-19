@@ -10,8 +10,8 @@ declare let ActionCable:any
 export class AppComponent{
   App: any = {};
 
-  wallets: any[] = [];
-  selectedWallet: any = "";
+  collection: any[] = [];
+  selectedItem: any = "";
 
   walletName :string;
 
@@ -33,7 +33,7 @@ export class AppComponent{
       received: function(data) {
         console.log('Data Received from backend', data);
         if(data.method === 'getWallets'){
-          self.wallets = data.data;
+          self.collection = data.data;
         }
       },
       createWallet: function(data){
@@ -47,11 +47,11 @@ export class AppComponent{
   }
 
   ngOnInit(){
-    
+
   }
 
   handleSelectionChange(){
-    console.log(this.selectedWallet);
+    console.log(this.selectedItem);
   }
 
 }

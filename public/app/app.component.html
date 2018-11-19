@@ -1,0 +1,36 @@
+<header-component></header-component>
+<div class="slds-grid slds-wrap">
+  <div class="slds-col slds-size_1-of-2">
+    <div class="slds-text-heading_medium slds-p-around_medium">MeWalleths</div>
+    <div class="slds-form-element slds-p-around_medium" *ngIf="wallets.length > 0">
+      <div class="slds-form-element__control">
+        <div class="slds-select_container">
+          <select  [(ngModel)]="selectedWallet" class="slds-select" (change)="handleSelectionChange()">
+            <option value="" selected disabled>Please select</option>
+            <option [ngValue]="wallet" *ngFor="let wallet of wallets">{{ wallet.name }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <p class="slds-p-around_medium" *ngIf="wallets.length === 0">No Walleth found. Please create a Walleth first.</p>
+    <hr/>
+    <div class="slds-text-heading_medium slds-p-around_medium">Create New Walleth</div>
+    <div class="slds-form slds-form_horizontal slds-p-around_medium">
+      <div class="slds-form-element">
+        <label class="slds-form-element__label" for="input-id-01">Wallet Name</label>
+        <div class="slds-form-element__control">
+          <input type="text" class="slds-input" [(ngModel)]="walletName"/>
+        </div>
+      </div>
+      <div class="slds-form-element">
+        <button class="slds-button slds-button--destructive slds-m-right--small"
+          (click)="App.MyChannel.createWallet()">Create New Wallet</button>
+      </div> 
+    </div>
+  </div>
+  <div class="slds-col slds-size_1-of-2">
+    <div class="slds-text-heading_medium slds-p-around_medium">Wallet Infos</div>
+    <p class="slds-p-around_medium" *ngIf="selectedWallet != ''">Select or Create a wallet first.</p>
+    
+  </div>
+</div>

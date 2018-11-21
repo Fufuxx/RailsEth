@@ -23,6 +23,11 @@ System.register(["@angular/core"], function (exports_1, context_1) {
                     this.App = {};
                     this.collection = [];
                     this.selectedItem = "";
+                    this.txData = {
+                        name: 'MeWallet',
+                        to_address: '0x88615D21ecB10FEA1eC83a716e605008BD8D1e74',
+                        value: this.getWeiValue(0.5)
+                    };
                     var self = this;
                     this.App.cable = ActionCable.createConsumer("ws://localhost:3000/cable");
                     this.App.MyChannel = this.App.cable.subscriptions.create({ channel: "MyChannel", context: {} }, {
@@ -49,6 +54,9 @@ System.register(["@angular/core"], function (exports_1, context_1) {
                         },
                         getWallets: function () {
                             this.perform('getWallets');
+                        },
+                        generateTransaction: function () {
+                            this.perform('generateTransaction', self.txData);
                         }
                     });
                 }
@@ -57,10 +65,17 @@ System.register(["@angular/core"], function (exports_1, context_1) {
                 AppComponent.prototype.handleSelectionChange = function () {
                     console.log(this.selectedItem);
                 };
+                AppComponent.prototype.getEthValue = function (wei) {
+                    return wei / Math.pow(10, 18);
+                };
+                AppComponent.prototype.getWeiValue = function (eth) {
+                    return eth * Math.pow(10, 18);
+                };
                 AppComponent = __decorate([
                     core_1.Component({
                         selector: 'app',
-                        templateUrl: '/app/app.component.html'
+                        templateUrl: '/app/app.component.html',
+                        styles: ["\n    .balance{\n        font-size: 30px;\n        font-weight: bold;\n    }\n\n    .red{\n        color: red;\n        font-weight: bold;\n    }\n\n    .green{\n        color:green;\n        font-weight: bold;\n    }\n  "]
                     }),
                     __metadata("design:paramtypes", [])
                 ], AppComponent);

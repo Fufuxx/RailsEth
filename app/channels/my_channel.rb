@@ -8,8 +8,6 @@ class MyChannel < ApplicationCable::Channel
 
   def createWallet(data)
     p " === Creating Wallet === "
-    p data['name']
-    #Generate new key pair
     key = Eth::Key.new
     wallet = Wallet.create(:name => data['name'], :pubkey => key.public_hex, :prvkey => key.private_hex, :address => key.address)
 
@@ -25,7 +23,9 @@ class MyChannel < ApplicationCable::Channel
       Wallet.all.each do |w|
         c = {
           :wallet => w,
-          :transactions => self.getTransactions(w.address)
+          :transactions => self.getTransactions(w.address),
+          :balance => self.getBalance(w.address)
+          #add balance
         }
 
         collection << c
@@ -43,10 +43,10 @@ class MyChannel < ApplicationCable::Channel
   def getBalance(address)
     begin
       p "Getting Eth Wallet Balance for address #{address}"
-
       url = "https://api-ropsten.etherscan.io/api?module=account&action=balance&address=#{address}&tag=latest&apikey=#{ENV['ETH_SCAN_API_KEY']}"
       res = HTTParty.get(url)
-      p res.parsed_response['result']
+      
+      return res.parsed_response['result']
     rescue Exception => e
       p e
     end
@@ -55,15 +55,12 @@ class MyChannel < ApplicationCable::Channel
   def getTransactions(address)
     begin
       p "=== Getting address based transaction list ==="
-
-      url = "http://api-ropsten.etherscan.io/api?module=account&action=txlist&address=#{address}&startblock=0&endblock=99999999&sort=asc&apikey=ENV['ETH_SCAN_API_KEY']"
-      
+      url = "http://api-ropsten.etherscan.io/api?module=account&action=txlist&address=#{address}&startblock=0&endblock=99999999&sort=asc&apikey=#{ENV['ETH_SCAN_API_KEY']}"
       res = HTTParty.get(url)
       result = res.parsed_response['result']
-
       txs = []
 
-      " == Tx Fields == "
+      p "=== Tx Fields ==="
       result.each do |r|
         from = r['from']
         to = r['to']
@@ -80,8 +77,65 @@ class MyChannel < ApplicationCable::Channel
         }
 
         txs << tx
-      end  
-      p txs
+      end 
+
+      return txs
+
+    rescue Exception => e
+      p e
+      return []
+    end
+  end
+
+  def generateTransaction(data)
+    p "=== Generating new transaction ==="
+    p data
+    begin
+      p "=== Wallet Name -> #{data['name']}"
+      p Wallet.where(:name => data['name'])
+
+      key = Eth::Key.new priv: Wallet.where(:name => data['name']).first.prvkey
+
+      format_address = Eth::Utils.format_address "#{data['to_address']}"
+
+      #Get Tx Number to set Nonce
+      txCountUrl = "https://api-ropsten.etherscan.io/api?module=proxy&action=eth_getTransactionCount&address=#{key.address}&tag=latest&apikey=#{ENV['ETH_SCAN_API_KEY']}"
+      res = HTTParty.get(txCountUrl)
+      result = res.parsed_response['result']
+      txNonce = Integer(result)
+
+      tx = Eth::Tx.new({
+        data: "".each_byte.map { |b| b.to_s(16) }.join,
+        gas_limit: 200_000,
+        gas_price: 5_000_000_000,
+        nonce: txNonce,
+        to: format_address,
+        value: data['value']
+      })
+
+      p tx
+
+      p "=== Tx Signing ==="
+      tx.sign key
+
+      p "=== Broadcasting ==="
+      self.broadcastTransaction(tx.hex)
+
+    rescue Exception => e
+      p e
+    end
+  end
+
+  def broadcastTransaction(tx)
+    begin
+      p "=== Broadcasting Tx to Ropsten ==="
+      url = "https://api-ropsten.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex=#{tx}&apikey=#{ENV['ETH_SCAN_API_KEY']}"
+      res = HTTParty.get(url)
+      p res
+      result = res.parsed_response['result']
+      p result
+      ActionCable.server.broadcast "MyStream",
+        { :method => 'broadcast', :status => 'success', :data => result }
     rescue Exception => e
       p e
     end

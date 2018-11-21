@@ -1,7 +1,7 @@
 <header-component></header-component>
 <div class="slds-grid slds-wrap">
   <div class="slds-col slds-size_1-of-2">
-    <div class="slds-text-heading_medium slds-p-around_medium">MeWalleths</div>
+    <div class="slds-text-heading_medium slds-p-around_medium">MeWallets</div>
     <div class="slds-form-element slds-p-around_medium" *ngIf="collection.length > 0">
       <div class="slds-form-element__control">
         <div class="slds-select_container">
@@ -12,10 +12,23 @@
         </div>
       </div>
     </div>
-    <p class="slds-p-around_medium" *ngIf="collection.length === 0">No Wallet found. Please create a Walleth first.</p>   
+    <p class="slds-p-around_medium" *ngIf="collection.length === 0">No Wallet found. Please create a Walleth first.</p>  
+    <div class="slds-p-around_medium balance" *ngIf="selectedItem != ''">
+      Balance: <span class="green">{{ getEthValue(selectedItem.balance) }} Eth</span>
+    </div>
+    <div class="slds-form slds-p-around_medium">
+      <div class="slds-form-element">
+        <label class="slds-form-element__label slds-p-bottom_medium" for="input-id-01">
+          Test Transaction Generation and Broadcast - Ropsten Network</label>
+        <div class="slds-form-element">
+          <button class="slds-button slds-button_brand slds-m-right--small"
+            (click)="App.MyChannel.generateTransaction()">Generate and Broadcast</button>
+        </div>
+      </div>
+    </div>
   </div>
   <div class="slds-col slds-size_1-of-2">
-    <div class="slds-text-heading_medium slds-p-around_medium">Create New Walleth</div>
+    <div class="slds-text-heading_medium slds-p-around_medium">Create New Wallet</div>
     <div class="slds-form slds-form_horizontal slds-p-around_medium">
       <div class="slds-form-element">
         <label class="slds-form-element__label" for="input-id-01">Wallet Name</label>
@@ -32,7 +45,7 @@
 </div>
 <div class="slds-grid slds-wrap">
   <div class="slds-col slds-size_1-of-1">
-    <div class="slds-text-heading_medium slds-p-around_medium">Wallet Transactions</div>
+    <div class="slds-p-around_medium slds-text-heading_medium slds-p-around_medium">Wallet Transactions</div>
     <p class="slds-p-around_medium" *ngIf="selectedItem === ''">Select or Create a wallet first.</p>
     <table *ngIf="selectedItem != ''" class="slds-table slds-table_cell-buffer slds-table_bordered">
       <thead>
@@ -51,13 +64,14 @@
       <tbody>
         <tr *ngFor="let tx of selectedItem.transactions" class="slds-hint-parent">
           <td data-label="Account Name">
-            <div class="slds-truncate" title="from">{{ tx.from }}</div>
+            <div class="slds-truncate slds-p-around_small" title="from">{{ tx.from }}</div>
           </td>
           <td data-label="Account Name">
-            <div class="slds-truncate" title="to">{{ tx.to }}</div>
+            <div class="slds-truncate slds-p-around_small" title="to">{{ tx.to }}</div>
           </td>
           <td data-label="Account Name">
-            <div class="slds-truncate" title="value">{{ tx.value }} Wei</div>
+            <div class="slds-truncate slds-p-around_small" title="value"
+              [class.red]="!tx.credit" [class.green]="tx.credit">{{ getEthValue(tx.value) }} Eth</div>
           </td>
         </tr>
       </tbody>

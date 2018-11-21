@@ -18,11 +18,9 @@
     </div>
     <div class="slds-form slds-p-around_medium">
       <div class="slds-form-element">
-        <label class="slds-form-element__label slds-p-bottom_medium" for="input-id-01">
-          Test Transaction Generation and Broadcast - Ropsten Network</label>
         <div class="slds-form-element">
           <button class="slds-button slds-button_brand slds-m-right--small"
-            (click)="App.MyChannel.generateTransaction()">Generate and Broadcast</button>
+            (click)="send_transaction = true;">Send Eth</button>
         </div>
       </div>
     </div>
@@ -77,4 +75,49 @@
       </tbody>
     </table>
   </div>
+  <!-- Modal Send Transaction -->
+  <section role="dialog" tabindex="-1" aria-modal="true" class="slds-modal" [class.slds-fade-in-open]="send_transaction">
+    <div class="slds-modal__container">
+      <header class="slds-modal__header">
+        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" (click)="send_transaction = false">
+          <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#close" />
+          </svg>
+          <span class="slds-assistive-text">Close</span>
+        </button>
+        <h2 class="slds-text-heading_medium slds-hyphenate">Send Transaction</h2>
+      </header>
+      <div class="slds-modal__content slds-p-around_medium">
+        <div class="slds-form-element">
+          <label class="slds-form-element__label" for="form-element-01">Send To</label>
+          <div class="slds-form-element__control">
+            <input type="text" class="slds-input" [(ngModel)]="tx.to_address" />
+          </div>
+        </div>
+        <div class="slds-form-element">
+          <label class="slds-form-element__label" for="form-element-01">Amount (eth)</label>
+          <div class="slds-form-element__control">
+            <input type="text" class="slds-input" [(ngModel)]="tx.value" (change)="setAmount()" />
+          </div>
+        </div>
+        <div class="slds-form-element">
+          <label class="slds-form-element__label" for="form-element-01">Gas Limit (wei)</label>
+          <div class="slds-form-element__control">
+            <input type="text" class="slds-input" [(ngModel)]="tx.gas_limit" />
+          </div>
+        </div>
+        <div class="slds-form-element">
+          <label class="slds-form-element__label" for="form-element-01">Gas Price (wei)</label>
+          <div class="slds-form-element__control">
+            <input type="text" class="slds-input" [(ngModel)]="tx.gas_price" />
+          </div>
+        </div>
+      </div>
+      <footer class="slds-modal__footer">
+        <button class="slds-button slds-button_neutral" (click)="send_transaction = false">Cancel</button>
+        <button class="slds-button slds-button_brand" (click)="sendTransaction()">Send</button>
+      </footer>
+    </div>
+  </section>
+  <div class="slds-backdrop" [class.slds-backdrop_open]="send_transaction"></div>
 </div>

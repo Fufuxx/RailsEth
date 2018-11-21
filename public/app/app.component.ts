@@ -31,10 +31,15 @@ export class AppComponent{
 
   walletName :string;
 
-  txData = {
-    name: 'MeWallet',
-    to_address: '0x88615D21ecB10FEA1eC83a716e605008BD8D1e74',
-    value: this.getWeiValue(0.5)
+  send_transaction = false;
+
+  tx = {
+    name: '',
+    to_address: '',
+    from: '',
+    value: 0,
+    gas_limit: 200000,
+    gas_price: 1000000000
   }
 
   constructor(){
@@ -67,7 +72,7 @@ export class AppComponent{
         this.perform('getWallets');
       },
       generateTransaction: function(){
-        this.perform('generateTransaction', self.txData);
+        this.perform('generateTransaction', self.tx);
       }
     });
   }
@@ -76,8 +81,14 @@ export class AppComponent{
 
   }
 
+  sendTransaction(){
+    console.log('Sending Transaction with data', this.tx);
+    this.App.MyChannel.generateTransaction();
+  }
+
   handleSelectionChange(){
-    console.log(this.selectedItem);
+    console.log('Selected Wallet', this.selectedItem);
+    this.tx.from = this.selectedItem.wallet.name;
   }
 
   getEthValue(wei){
@@ -86,6 +97,11 @@ export class AppComponent{
 
   getWeiValue(eth){
     return eth * Math.pow(10, 18); 
+  }
+
+  setAmount(){
+    console.log(this.tx.value);
+    this.tx.value = +this.tx.value;
   }
 
 }

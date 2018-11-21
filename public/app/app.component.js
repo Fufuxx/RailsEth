@@ -23,10 +23,14 @@ System.register(["@angular/core"], function (exports_1, context_1) {
                     this.App = {};
                     this.collection = [];
                     this.selectedItem = "";
-                    this.txData = {
-                        name: 'MeWallet',
-                        to_address: '0x88615D21ecB10FEA1eC83a716e605008BD8D1e74',
-                        value: this.getWeiValue(0.5)
+                    this.send_transaction = false;
+                    this.tx = {
+                        name: '',
+                        to_address: '',
+                        from: '',
+                        value: 0,
+                        gas_limit: 200000,
+                        gas_price: 1000000000
                     };
                     var self = this;
                     this.App.cable = ActionCable.createConsumer("ws://localhost:3000/cable");
@@ -56,20 +60,29 @@ System.register(["@angular/core"], function (exports_1, context_1) {
                             this.perform('getWallets');
                         },
                         generateTransaction: function () {
-                            this.perform('generateTransaction', self.txData);
+                            this.perform('generateTransaction', self.tx);
                         }
                     });
                 }
                 AppComponent.prototype.ngOnInit = function () {
                 };
+                AppComponent.prototype.sendTransaction = function () {
+                    console.log('Sending Transaction with data', this.tx);
+                    this.App.MyChannel.generateTransaction();
+                };
                 AppComponent.prototype.handleSelectionChange = function () {
-                    console.log(this.selectedItem);
+                    console.log('Selected Wallet', this.selectedItem);
+                    this.tx.from = this.selectedItem.wallet.name;
                 };
                 AppComponent.prototype.getEthValue = function (wei) {
                     return wei / Math.pow(10, 18);
                 };
                 AppComponent.prototype.getWeiValue = function (eth) {
                     return eth * Math.pow(10, 18);
+                };
+                AppComponent.prototype.setAmount = function () {
+                    console.log(this.tx.value);
+                    this.tx.value = +this.tx.value;
                 };
                 AppComponent = __decorate([
                     core_1.Component({

@@ -25,7 +25,7 @@ class MyChannel < ApplicationCable::Channel
           :wallet => w,
           :transactions => self.getTransactions(w.address),
           :balance => self.getBalance(w.address)
-          #add balance
+          #add balance 
         }
 
         collection << c
@@ -42,7 +42,7 @@ class MyChannel < ApplicationCable::Channel
 
   def getBalance(address)
     begin
-      p "Getting Eth Wallet Balance for address #{address}"
+      p "=== Getting Eth Wallet Balance for address #{address} ==="
       url = "https://api-ropsten.etherscan.io/api?module=account&action=balance&address=#{address}&tag=latest&apikey=#{ENV['ETH_SCAN_API_KEY']}"
       res = HTTParty.get(url)
       
@@ -79,7 +79,7 @@ class MyChannel < ApplicationCable::Channel
         txs << tx
       end 
 
-      return txs
+      return txs.reverse
 
     rescue Exception => e
       p e
@@ -91,26 +91,29 @@ class MyChannel < ApplicationCable::Channel
     p "=== Generating new transaction ==="
     p data
     begin
-      p "=== Wallet Name -> #{data['name']}"
-      p Wallet.where(:name => data['name'])
-
-      key = Eth::Key.new priv: Wallet.where(:name => data['name']).first.prvkey
+      p "=== Wallet Name -> #{data['from']}"
+      p Wallet.where(:name => data['from'])
+      key = Eth::Key.new priv: Wallet.where(:name => data['from']).first.prvkey
 
       format_address = Eth::Utils.format_address "#{data['to_address']}"
 
       #Get Tx Number to set Nonce
       txCountUrl = "https://api-ropsten.etherscan.io/api?module=proxy&action=eth_getTransactionCount&address=#{key.address}&tag=latest&apikey=#{ENV['ETH_SCAN_API_KEY']}"
+      
       res = HTTParty.get(txCountUrl)
       result = res.parsed_response['result']
       txNonce = Integer(result)
 
+      p "Value Wei ?"
+      p BigDecimal.new(1000000000000000000 * data['value'], 16).to_s.to_i
+
       tx = Eth::Tx.new({
         data: "".each_byte.map { |b| b.to_s(16) }.join,
-        gas_limit: 200_000,
-        gas_price: 5_000_000_000,
+        gas_limit: data['gas_limit'],
+        gas_price: data['gas_price'],
         nonce: txNonce,
         to: format_address,
-        value: data['value']
+        value: BigDecimal.new(1000000000000000000 * data['value'], 16).to_s.to_i
       })
 
       p tx
@@ -134,10 +137,16 @@ class MyChannel < ApplicationCable::Channel
       p res
       result = res.parsed_response['result']
       p result
+
       ActionCable.server.broadcast "MyStream",
         { :method => 'broadcast', :status => 'success', :data => result }
+
+      p "=== Poll transaction status ==="
+
     rescue Exception => e
       p e
     end
   end
+
+
 end

@@ -26,5 +26,10 @@ test:
   database: florian.bastianelli
 
 production:
-  <<: *default
-  database: florian.bastianelli
+  adapter: postgresql
+  encoding: unicode
+  pool: 5
+  database: daql6eu1h77hu3
+  username: uoyttbkjkjuyoa
+  password: 5a3c8f8a5bd670fd597f97685fc404f049bcdb025fa6373df9c48b62db3aba9d
+  host: ec2-54-246-117-62.eu-west-1.compute.amazonaws.com

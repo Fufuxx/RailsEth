@@ -33,7 +33,7 @@ System.register(["@angular/core"], function (exports_1, context_1) {
                         gas_price: 1000000000
                     };
                     var self = this;
-                    this.App.cable = ActionCable.createConsumer("ws://localhost:3000/cable");
+                    this.App.cable = ActionCable.createConsumer("ws://me-walleth.herokuapp.com/cable");
                     this.App.MyChannel = this.App.cable.subscriptions.create({ channel: "MyChannel", context: {} }, {
                         // ActionCable callbacks
                         connected: function () {

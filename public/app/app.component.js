@@ -32,8 +32,13 @@ System.register(["@angular/core"], function (exports_1, context_1) {
                         gas_limit: 200000,
                         gas_price: 1000000000
                     };
+                    this.wallets_toggle = false;
+                    this.pending_tx = false;
+                    this.tx_hash = '';
                     var self = this;
-                    this.App.cable = ActionCable.createConsumer("wss://me-walleth.herokuapp.com/cable");
+                    console.log('Config -> ', config);
+                    //this.App.cable = ActionCable.createConsumer("wss://me-walleth.herokuapp.com/cable");
+                    this.App.cable = ActionCable.createConsumer(config.cable);
                     this.App.MyChannel = this.App.cable.subscriptions.create({ channel: "MyChannel", context: {} }, {
                         // ActionCable callbacks
                         connected: function () {
@@ -51,6 +56,9 @@ System.register(["@angular/core"], function (exports_1, context_1) {
                             if (data.method === 'getWallets') {
                                 self.collection = data.data;
                             }
+                            if (data.method == 'broadcast') {
+                                self.tx_hash = data.data;
+                            }
                         },
                         createWallet: function (data) {
                             console.log('Creating New Wallet...');
@@ -67,11 +75,18 @@ System.register(["@angular/core"], function (exports_1, context_1) {
                 AppComponent.prototype.ngOnInit = function () {
                 };
                 AppComponent.prototype.sendTransaction = function () {
-                    console.log('Sending Transaction with data', this.tx);
                     this.App.MyChannel.generateTransaction();
+                    this.selectedItem.balance = this.selectedItem.balance - this.tx.value;
+                    // this.selectedItem.transactions.push({
+                    //   from: this.tx.from,
+                    //   to: this.tx.to_address,
+                    //   value: this.tx.value,
+                    //   credit: null
+                    // });
+                    this.pending_tx = true;
+                    this.send_transaction = false;
                 };
                 AppComponent.prototype.handleSelectionChange = function () {
-                    console.log('Selected Wallet', this.selectedItem);
                     this.tx.from = this.selectedItem.wallet.name;
                 };
                 AppComponent.prototype.getEthValue = function (wei) {
@@ -81,8 +96,12 @@ System.register(["@angular/core"], function (exports_1, context_1) {
                     return eth * Math.pow(10, 18);
                 };
                 AppComponent.prototype.setAmount = function () {
-                    console.log(this.tx.value);
                     this.tx.value = +this.tx.value;
+                };
+                //In case of
+                AppComponent.prototype.getUnselectedWallets = function () {
+                    var _this = this;
+                    return this.collection.filter(function (e) { return e.wallet.address != _this.selectedItem.wallet.address; });
                 };
                 AppComponent = __decorate([
                     core_1.Component({

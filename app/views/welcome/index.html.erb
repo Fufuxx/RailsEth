@@ -35,8 +35,12 @@
       packages: packages
     });
 
-    // and to finish, let's boot the app!
+    // and to finish, let s boot the app!
     System.import('app/main');
+
+    let config = {
+      cable: "<%= ENV['CABLE'] %>"
+    };
 </script>
 <base href=".">
 <app>Loading...</app>  

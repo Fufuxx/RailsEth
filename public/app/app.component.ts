@@ -1,6 +1,8 @@
 import {Component} from '@angular/core'
+import { CompilerConfig } from '../node_modules/@angular/compiler';
 
 declare let ActionCable:any
+declare let config: any;
 
 @Component({
   selector: 'app',
@@ -42,10 +44,17 @@ export class AppComponent{
     gas_price: 1000000000
   }
 
+  wallets_toggle = false;
+  pending_tx = false;
+
+  tx_hash = '';
+
   constructor(){
-    let self = this;
+    let self = this; 
+    console.log('Config -> ', config);
     
-    this.App.cable = ActionCable.createConsumer("wss://me-walleth.herokuapp.com/cable");
+    //this.App.cable = ActionCable.createConsumer("wss://me-walleth.herokuapp.com/cable");
+    this.App.cable = ActionCable.createConsumer(config.cable);
     this.App.MyChannel = this.App.cable.subscriptions.create({channel: "MyChannel", context: {} }, {
       // ActionCable callbacks
       connected: function() {
@@ -62,6 +71,9 @@ export class AppComponent{
         console.log('Data Received from backend', data);
         if(data.method === 'getWallets'){
           self.collection = data.data;
+        }
+        if(data.method == 'broadcast'){
+          self.tx_hash = data.data;
         }
       },
       createWallet: function(data){
@@ -82,12 +94,19 @@ export class AppComponent{
   }
 
   sendTransaction(){
-    console.log('Sending Transaction with data', this.tx);
     this.App.MyChannel.generateTransaction();
+    this.selectedItem.balance = this.selectedItem.balance - this.tx.value;
+    // this.selectedItem.transactions.push({
+    //   from: this.tx.from,
+    //   to: this.tx.to_address,
+    //   value: this.tx.value,
+    //   credit: null
+    // });
+    this.pending_tx = true;
+    this.send_transaction = false;
   }
 
   handleSelectionChange(){
-    console.log('Selected Wallet', this.selectedItem);
     this.tx.from = this.selectedItem.wallet.name;
   }
 
@@ -100,8 +119,12 @@ export class AppComponent{
   }
 
   setAmount(){
-    console.log(this.tx.value);
     this.tx.value = +this.tx.value;
+  }
+
+  //In case of
+  getUnselectedWallets(){
+    return this.collection.filter(e => e.wallet.address != this.selectedItem.wallet.address)
   }
 
 }

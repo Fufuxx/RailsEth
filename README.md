@@ -10,5 +10,5 @@ Note - You should have pg running and check config/database.yml to make sure you
 
 rake db:migrate
 
-###### In Development... For Testing only - Using obsolete version of Angular
+##### In Development... For Testing only - Using version 4.0.0 of Angular
 

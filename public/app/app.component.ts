@@ -51,9 +51,6 @@ export class AppComponent{
 
   constructor(){
     let self = this; 
-    console.log('Config -> ', config);
-    
-    //this.App.cable = ActionCable.createConsumer("wss://me-walleth.herokuapp.com/cable");
     this.App.cable = ActionCable.createConsumer(config.cable);
     this.App.MyChannel = this.App.cable.subscriptions.create({channel: "MyChannel", context: {} }, {
       // ActionCable callbacks
